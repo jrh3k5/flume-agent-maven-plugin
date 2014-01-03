@@ -42,12 +42,30 @@ public class FlumePlugin {
     }
 
     /**
+     * Get the classifier to be matched.
+     * 
+     * @return The classifier to be matched.
+     */
+    public String getClassifier() {
+        return classifier;
+    }
+
+    /**
      * Get the group ID of the Flume plugin.
      * 
      * @return The group ID of the Flume plugin.
      */
     public String getGroupId() {
         return groupId;
+    }
+
+    /**
+     * Get the type to be matched.
+     * 
+     * @return The type to be matched.
+     */
+    public String getType() {
+        return type;
     }
 
     /**
@@ -76,6 +94,16 @@ public class FlumePlugin {
     }
 
     /**
+     * Set the classifier to be matched.
+     * 
+     * @param classifier
+     *            The classifier to be matched.
+     */
+    public void setClassifier(String classifier) {
+        this.classifier = classifier;
+    }
+
+    /**
      * Set the group ID of the Flume plugin.
      * 
      * @param groupId
@@ -83,6 +111,16 @@ public class FlumePlugin {
      */
     public void setGroupId(String groupId) {
         this.groupId = groupId;
+    }
+
+    /**
+     * Set the type to be matched.
+     * 
+     * @param type
+     *            The type to be matched.
+     */
+    public void setType(String type) {
+        this.type = type;
     }
 
     @Override
