@@ -2,7 +2,7 @@
 <FindBugsFilter>
     <Match>
         <!-- We're not lazy initializing the field -->
-        <Class name="com.cerner.basset.mojo.flume.process.AgentProcessContainer" />
+        <Class name="com.github.jrh3k5.mojo.flume.process.AgentProcessContainer" />
         <Field name="agentProcess" />
         <Bug pattern="LI_LAZY_INIT_STATIC" />
     </Match>
