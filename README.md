@@ -36,6 +36,20 @@ An example configuration might look like:
 
 The following are configuration parameters that can be configured optionally; either reasonable defaults are provided or they are not needed to run the agent.
 
+#### Removing Flume Libraries
+
+Flume does not provide an out-of-the-box way to override the libraries provided by Flume. This can result in dependency collisions with plugins. To facilitate deference of classloading to the libraries provided by Flume plugins, this Maven plugin allows the specification of libraries to be removed from the Flume agent prior to it being started.
+
+For example, to remove the <tt>libthrift-0.7.0.jar</tt> from the Flume agent's <tt>lib/</tt> directory, you can provide a configuration like the following:
+
+    <configuration>
+        <libs>
+            <removals>
+                <removal>libthrift-0.7.0.jar</removal>
+            </removals>
+        </libs>
+    </configuration>
+
 #### Setting the JAVA_OPTS Parameter
 
 This can be used to set the JAVA_OPTS parameter passed to the Flume agent's Java environment. This can be particularly useful because Flume, by default, only runs with a max heap of 20 MB (which can easily be too low, especially when using custom sinks, channels, and sources) or if you wish to enable JMX in the Flume agent to access its MBeans. An example configuration may look like:
