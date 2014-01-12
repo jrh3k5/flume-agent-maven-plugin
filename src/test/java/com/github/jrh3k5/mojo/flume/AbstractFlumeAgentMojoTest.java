@@ -253,6 +253,33 @@ public class AbstractFlumeAgentMojoTest extends AbstractUnitTest {
     }
 
     /**
+     * Test the removal of libraries from the Flume installation.
+     * 
+     * @throws Exception
+     *             If any errors occur during the test run.
+     */
+    @Test
+    public void testRemoveLibs() throws Exception {
+        final File testDirectory = createTestDirectory();
+        final File libDir = new File(testDirectory, "lib");
+        FileUtils.forceMkdir(libDir);
+
+        final File toRemove = new File(libDir, "toremove.jar");
+        FileUtils.touch(toRemove);
+        final File toKeep = new File(libDir, "tokeep.jar");
+        FileUtils.touch(toKeep);
+
+        final Libs libs = Whitebox.getInternalState(mojo, "libs");
+        libs.setRemovals(Collections.singletonList(toRemove.getName()));
+
+        // The mojo should remove only the configured library
+        mojo.removeLibs(testDirectory);
+
+        assertThat(toRemove).doesNotExist();
+        assertThat(toKeep).exists();
+    }
+
+    /**
      * Test the unpacking of Flume.
      * 
      * @throws Exception

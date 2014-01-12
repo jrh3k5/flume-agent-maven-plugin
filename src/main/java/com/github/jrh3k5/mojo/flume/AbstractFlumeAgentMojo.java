@@ -35,6 +35,7 @@ import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
@@ -119,6 +120,23 @@ public abstract class AbstractFlumeAgentMojo extends AbstractMojo {
      */
     @Parameter(required = true, defaultValue = "http://archive.apache.org/dist/flume/1.4.0/apache-flume-1.4.0-bin.tar.gz")
     private URL flumeArchiveUrl;
+
+    /**
+     * This configures any changes that are to be made to the {@code libs/} directory in the Flume installation.
+     * <p />
+     * For example, to remove the {@code libthrift-0.7.0.jar} library from the {@code lib/} directory, you might provide a configuration that looks like:
+     * 
+     * <pre>
+     * &lt;libs&gt;
+     *   &lt;removals&gt;
+     *     &lt;removal&gt;libthrift-0.7.0.jar&lt;/removal&gt;
+     *   &lt;/removals&gt;
+     * &lt;/libs&gt;
+     * </pre>
+     * 
+     * @since 1.1
+     */
+    private Libs libs = new Libs();
 
     /**
      * The Maven project descriptor.
@@ -232,6 +250,32 @@ public abstract class AbstractFlumeAgentMojo extends AbstractMojo {
             return artifacts;
         } catch (DependencyGraphBuilderException e) {
             throw new IOException("Failed to find plugins as dependencies.", e);
+        }
+    }
+
+    /**
+     * Remove any libraries from the {@code lib/} directory in the given Flume installation directory.
+     * 
+     * @param flumeDirectory
+     *            A {@link File} representing the directory in which a Flume agent - fro which the configured libraries are to be removed - is installed.
+     * @throws IOException
+     *             If any errors occur during the removal.
+     * @since 1.1
+     */
+    void removeLibs(File flumeDirectory) throws IOException {
+        final File libDir = new File(flumeDirectory, "lib");
+        final Log log = getLog();
+        final boolean isDebugEnabled = log.isDebugEnabled();
+        for (String removal : libs.getRemovals()) {
+            final File lib = new File(libDir, removal);
+            if (lib.exists()) {
+                if (isDebugEnabled) {
+                    log.debug(String.format("The file %s exists and will be removed.", lib.getAbsolutePath()));
+                }
+                FileUtils.forceDelete(lib);
+            } else {
+                log.warn(String.format("The file %s was specified for deletion, but could not be found in %s", removal, libDir.getAbsolutePath()));
+            }
         }
     }
 
