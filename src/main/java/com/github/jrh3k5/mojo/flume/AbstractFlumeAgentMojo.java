@@ -198,6 +198,11 @@ public abstract class AbstractFlumeAgentMojo extends AbstractMojo {
         } catch (IOException e) {
             throw new MojoExecutionException("Error writing Flume environment to directory: " + flumeDirectory.getAbsolutePath(), e);
         }
+        try {
+            removeLibs(flumeDirectory);
+        } catch (IOException e) {
+            throw new MojoExecutionException("Failed to remove libs.", e);
+        }
         final AgentProcess.Builder builder = AgentProcess.newBuilder(flumeDirectory);
         return builder.withAgent(getAgentName()).withConfigFile(getConfigFile()).build();
     }

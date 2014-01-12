@@ -34,9 +34,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.mutable.MutableBoolean;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.ArtifactResolutionRequest;
 import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
@@ -116,35 +116,42 @@ public class AbstractFlumeAgentMojoTest extends AbstractUnitTest {
         when(agentProcessBuilder.withConfigFile(configFile)).thenReturn(agentProcessBuilder);
         when(agentProcessBuilder.build()).thenReturn(agentProcess);
 
-        final AtomicBoolean copiedPlugins = new AtomicBoolean(false);
-        final AtomicBoolean unpackedFlume = new AtomicBoolean(false);
-        final AtomicBoolean wroteFlumeEnvironment = new AtomicBoolean(false);
+        final MutableBoolean copiedPlugins = new MutableBoolean(false);
+        final MutableBoolean unpackedFlume = new MutableBoolean(false);
+        final MutableBoolean wroteFlumeEnvironment = new MutableBoolean(false);
+        final MutableBoolean removedLibs = new MutableBoolean(false);
 
         final ConcreteMojo toTest = setParameters(new ConcreteMojo() {
             @Override
             void copyFlumePlugins(File givenFlumeDirectory) throws IOException {
-                copiedPlugins.set(true);
+                copiedPlugins.setValue(true);
                 assertThat(givenFlumeDirectory).isEqualTo(flumeDirectory);
             }
 
             @Override
             File unpackFlume(FlumeArchiveCache archiveCache) throws IOException {
-                unpackedFlume.set(true);
+                unpackedFlume.setValue(true);
                 return flumeDirectory;
             }
 
             @Override
             void writeFlumeEnvironment(File givenFlumeDirectory) throws IOException {
-                wroteFlumeEnvironment.set(true);
+                wroteFlumeEnvironment.setValue(true);
+                assertThat(givenFlumeDirectory).isEqualTo(flumeDirectory);
+            }
+
+            @Override
+            void removeLibs(File givenFlumeDirectory) throws IOException {
+                removedLibs.setValue(true);
                 assertThat(givenFlumeDirectory).isEqualTo(flumeDirectory);
             }
         });
 
         assertThat(toTest.buildAgentProcess()).isEqualTo(agentProcess);
 
-        assertThat(copiedPlugins.get()).isTrue();
-        assertThat(unpackedFlume.get()).isTrue();
-        assertThat(wroteFlumeEnvironment.get()).isTrue();
+        assertThat(copiedPlugins.isTrue()).isTrue();
+        assertThat(unpackedFlume.isTrue()).isTrue();
+        assertThat(wroteFlumeEnvironment.isTrue()).isTrue();
     }
 
     /**
