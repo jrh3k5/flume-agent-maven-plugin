@@ -38,6 +38,8 @@ The following are configuration parameters that can be configured optionally; ei
 
 #### Removing Flume Libraries
 
+This feature was introduced in version 1.1 of the plugin.
+
 Flume does not provide an out-of-the-box way to override the libraries provided by Flume. This can result in dependency collisions with plugins. To facilitate deference of classloading to the libraries provided by Flume plugins, this Maven plugin allows the specification of libraries to be removed from the Flume agent prior to it being started.
 
 For example, to remove the <tt>libthrift-0.7.0.jar</tt> from the Flume agent's <tt>lib/</tt> directory, you can provide a configuration like the following:
