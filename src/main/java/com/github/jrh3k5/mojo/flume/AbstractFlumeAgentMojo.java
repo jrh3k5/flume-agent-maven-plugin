@@ -136,6 +136,7 @@ public abstract class AbstractFlumeAgentMojo extends AbstractMojo {
      * 
      * @since 1.1
      */
+    @Parameter
     private Libs libs = new Libs();
 
     /**
