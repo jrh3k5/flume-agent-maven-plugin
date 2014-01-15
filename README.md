@@ -74,10 +74,12 @@ The Flume plugin installation uses the dependency resolution of your POM to loca
                    <artifactId>flume-agent-maven-plugin</artifactId>
                    <configuration>
                        <flumePlugins>
-                           <groupId>com.me</groupId> <!-- required -->
-                           <artifactId>my-project</artifactId> <!-- required -->
-                           <classifier>flume-plugin</classifier> <!-- default value - this is optional -->
-                           <type>tar.gz</type> <!-- default value - this is optional -->
+                           <flumePlugin>
+                               <groupId>com.me</groupId> <!-- required -->
+                               <artifactId>my-project</artifactId> <!-- required -->
+                               <classifier>flume-plugin</classifier> <!-- default value - this is optional -->
+                               <type>tar.gz</type> <!-- default value - this is optional -->
+                           </flumePlugin>
                        </flumePlugins>
                    </configuration>
                </plugin>
