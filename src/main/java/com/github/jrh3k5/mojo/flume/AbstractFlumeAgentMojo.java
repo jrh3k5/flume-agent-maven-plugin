@@ -70,7 +70,7 @@ public abstract class AbstractFlumeAgentMojo extends AbstractMojo {
     /**
      * The directory to which the installation of the Flume agent should be extracted.
      */
-    @Parameter(defaultValue = "${project.build.directory}")
+    @Parameter(defaultValue = "${project.build.directory}/apache-flume")
     private File outputDirectory;
 
     /**
@@ -297,7 +297,7 @@ public abstract class AbstractFlumeAgentMojo extends AbstractMojo {
      *             If any errors occur during the unpacking.
      */
     File unpackFlume(FlumeArchiveCache archiveCache) throws IOException {
-        return new FlumeCopier(archiveCache).copyTo(outputDirectory);
+        return new FlumeCopier(archiveCache).copyTo(getAgentDirectory());
     }
 
     /**
@@ -312,6 +312,22 @@ public abstract class AbstractFlumeAgentMojo extends AbstractMojo {
         final File confDir = new File(flumeDirectory, "conf");
         FileUtils.forceMkdir(confDir);
         FileUtils.fileWrite(new File(confDir, "flume-env.sh"), outputEncoding, String.format("JAVA_OPTS=\"%s\"", javaOpts));
+    }
+
+    /**
+     * Get the directory into which the agent will be installed.
+     * 
+     * @return A {@link File} representing the directory into which the agent will be installed.
+     * @throws IOException
+     *             If any errors occur while creating the agent directory.
+     * @since 1.2
+     */
+    private File getAgentDirectory() throws IOException {
+        final File agentDirectory = new File(outputDirectory, getAgentName());
+        if (!agentDirectory.exists()) {
+            FileUtils.forceMkdir(agentDirectory);
+        }
+        return agentDirectory;
     }
 
     /**

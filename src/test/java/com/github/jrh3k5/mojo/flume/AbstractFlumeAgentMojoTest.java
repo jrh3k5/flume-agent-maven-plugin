@@ -301,7 +301,7 @@ public class AbstractFlumeAgentMojoTest extends AbstractUnitTest {
 
         final File flumeDirectory = new File(createTestDirectory(), "flume");
         final FlumeCopier flumeCopier = mock(FlumeCopier.class);
-        when(flumeCopier.copyTo(outputDirectory)).thenReturn(flumeDirectory);
+        when(flumeCopier.copyTo(new File(outputDirectory, agentName))).thenReturn(flumeDirectory);
         whenNew(FlumeCopier.class).withArguments(archiveCache).thenReturn(flumeCopier);
         assertThat(mojo.unpackFlume(archiveCache)).isEqualTo(flumeDirectory);
     }
