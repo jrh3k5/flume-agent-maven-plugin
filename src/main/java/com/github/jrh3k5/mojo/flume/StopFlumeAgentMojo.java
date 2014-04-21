@@ -34,6 +34,6 @@ import com.github.jrh3k5.mojo.flume.process.AgentProcessContainer;
 public class StopFlumeAgentMojo extends AbstractFlumeAgentMojo {
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        AgentProcessContainer.stopAgentProcess();
+        AgentProcessContainer.stopAgentProcess(getAgentName());
     }
 }

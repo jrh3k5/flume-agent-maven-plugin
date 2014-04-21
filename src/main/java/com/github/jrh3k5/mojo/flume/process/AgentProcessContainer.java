@@ -17,6 +17,12 @@
  */
 package com.github.jrh3k5.mojo.flume.process;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
 /**
  * A container used to share known state about an agent process across mojo invocations.
  * 
@@ -24,15 +30,26 @@ package com.github.jrh3k5.mojo.flume.process;
  */
 
 public class AgentProcessContainer {
-    private static AgentProcess agentProcess;
+    private static final Map<String, AgentProcess> AGENT_PROCESSES = new HashMap<String, AgentProcess>();
+    private static final ReadWriteLock PROCESSES_LOCK = new ReentrantReadWriteLock();
 
     /**
      * Stop any previously-stored, started agent process.
+     * 
+     * @param agentName
+     *            The name of the agent to be stopped.
+     * @since 1.2
      */
-    public static void stopAgentProcess() {
-        if (agentProcess != null) {
-            agentProcess.stop();
-            agentProcess = null;
+    public static void stopAgentProcess(String agentName) {
+        final Lock writeLock = PROCESSES_LOCK.writeLock();
+        writeLock.lock();
+        try {
+            final AgentProcess agentProcess = AGENT_PROCESSES.remove(agentName);
+            if (agentProcess != null) {
+                agentProcess.stop();
+            }
+        } finally {
+            writeLock.unlock();
         }
     }
 
@@ -43,6 +60,16 @@ public class AgentProcessContainer {
      *            The {@link AgentProcess} to be stored for later interaction and retrieval.
      */
     public static void storeAgentProcess(AgentProcess agentProcess) {
-        AgentProcessContainer.agentProcess = agentProcess;
+        final String agentName = agentProcess.getAgentName();
+        final Lock writeLock = PROCESSES_LOCK.writeLock();
+        writeLock.lock();
+        try {
+            if(AGENT_PROCESSES.containsKey(agentName)) {
+                throw new IllegalStateException(String.format("An agent process by the name %s has already been started. This will require manual cleanup of your Flume processes.", agentProcess));
+            }
+            AGENT_PROCESSES.put(agentName, agentProcess);
+        } finally {
+            writeLock.unlock();
+        }
     }
 }
