@@ -63,6 +63,20 @@ public class AgentProcess {
     }
 
     /**
+     * Get the name of the agent.
+     * 
+     * @return The name of the agent.
+     * @since 1.2
+     */
+    public String getAgentName() {
+        final String agentName = arguments.get(AgentArguments.AGENT_NAME);
+        if (agentName == null) {
+            throw new IllegalStateException("No agent name found in given arguments.");
+        }
+        return agentName;
+    }
+
+    /**
      * Join this thread to the execution of the Flume agent.
      * 
      * @throws InterruptedException

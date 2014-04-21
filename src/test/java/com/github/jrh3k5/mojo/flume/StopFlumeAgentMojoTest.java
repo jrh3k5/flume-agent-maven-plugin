@@ -20,10 +20,13 @@ package com.github.jrh3k5.mojo.flume;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
+import java.util.UUID;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.reflect.Whitebox;
 
 import com.github.jrh3k5.mojo.flume.process.AgentProcessContainer;
 
@@ -38,11 +41,20 @@ import com.github.jrh3k5.mojo.flume.process.AgentProcessContainer;
 public class StopFlumeAgentMojoTest {
     private final StopFlumeAgentMojo mojo = new StopFlumeAgentMojo();
 
+    /**
+     * Test the stopping of an agent.
+     * 
+     * @throws Exception
+     *             If any errors occur during the test run.
+     */
     @Test
     public void testExecuteMojo() throws Exception {
+        final String agentName = UUID.randomUUID().toString();
+        Whitebox.setInternalState(mojo, "agentName", agentName);
+
         mockStatic(AgentProcessContainer.class);
         mojo.execute();
         verifyStatic();
-        AgentProcessContainer.stopAgentProcess();
+        AgentProcessContainer.stopAgentProcess(agentName);
     }
 }
