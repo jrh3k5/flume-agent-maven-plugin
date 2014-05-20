@@ -39,15 +39,15 @@ import com.github.jrh3k5.mojo.flume.process.AgentProcessContainer;
 @Mojo(name = "stop", defaultPhase = LifecyclePhase.POST_INTEGRATION_TEST)
 public class StopFlumeAgentsMojo extends AbstractMojo {
     /**
-     * The names of the agents to be stopped.
+     * The configuration of agents to be run, expressed as {@link Agent} objects.
      */
     @Parameter(required = true)
-    private List<String> agentNames = Collections.emptyList();
+    private List<Agent> agents = Collections.emptyList();
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        for (String agentName : agentNames) {
-            AgentProcessContainer.stopAgentProcess(agentName);
+        for (Agent agent : agents) {
+            AgentProcessContainer.stopAgentProcess(agent.getAgentName());
         }
     }
 }

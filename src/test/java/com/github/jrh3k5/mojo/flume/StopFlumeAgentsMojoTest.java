@@ -17,6 +17,8 @@
  */
 package com.github.jrh3k5.mojo.flume;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
@@ -52,7 +54,9 @@ public class StopFlumeAgentsMojoTest {
     @Test
     public void testExecuteMojo() throws Exception {
         final String agentName = UUID.randomUUID().toString();
-        Whitebox.setInternalState(mojo, "agentNames", Collections.singletonList(agentName));
+        final Agent agent = mock(Agent.class);
+        when(agent.getAgentName()).thenReturn(agentName);
+        Whitebox.setInternalState(mojo, "agents", Collections.singletonList(agent));
 
         mockStatic(AgentProcessContainer.class);
         mojo.execute();

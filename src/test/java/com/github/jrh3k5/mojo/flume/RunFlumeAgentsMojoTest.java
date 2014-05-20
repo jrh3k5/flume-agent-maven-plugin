@@ -22,7 +22,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import java.util.Collections;
-import java.util.UUID;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.junit.Test;
@@ -46,24 +45,17 @@ public class RunFlumeAgentsMojoTest {
      */
     @Test
     public void testExecuteMojo() throws Exception {
-        final String agentName = UUID.randomUUID().toString();
         final Agent agent = mock(Agent.class);
         final AgentProcess agentProcess = mock(AgentProcess.class);
 
         final RunFlumeAgentsMojo toTest = new RunFlumeAgentsMojo() {
-            @Override
-            protected Agent getAgent(String givenAgentName) {
-                assertThat(givenAgentName).isEqualTo(agentName);
-                return agent;
-            }
-
             @Override
             protected AgentProcess buildAgentProcess(Agent givenAgent) throws MojoExecutionException {
                 assertThat(givenAgent).isEqualTo(agent);
                 return agentProcess;
             }
         };
-        Whitebox.setInternalState(toTest, "agentNames", Collections.singletonList(agentName));
+        Whitebox.setInternalState(toTest, "agents", Collections.singletonList(agent));
         toTest.execute();
         verify(agentProcess).start();
         verify(agentProcess).join();

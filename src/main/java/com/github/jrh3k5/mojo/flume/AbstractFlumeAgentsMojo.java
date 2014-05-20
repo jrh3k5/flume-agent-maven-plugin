@@ -99,14 +99,8 @@ public abstract class AbstractFlumeAgentsMojo extends AbstractMojo {
     private List<Agent> agents = Collections.emptyList();
 
     // TODO: document, test
-    protected Agent getAgent(String agentName) {
-        for (Agent agent : agents) {
-            if (agentName.equals(agent.getAgentName())) {
-                return agent;
-            }
-        }
-
-        return null;
+    protected List<Agent> getAgents() {
+        return Collections.unmodifiableList(agents);
     }
 
     /**

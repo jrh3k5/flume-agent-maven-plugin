@@ -24,7 +24,6 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 import java.util.Collections;
-import java.util.UUID;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.junit.Test;
@@ -56,24 +55,16 @@ public class StartFlumeAgentsMojoTest {
     public void testExecuteMojo() throws Exception {
         mockStatic(AgentProcessContainer.class);
 
-        final String agentName = UUID.randomUUID().toString();
         final Agent agent = mock(Agent.class);
         final AgentProcess agentProcess = mock(AgentProcess.class);
-        // TODO: make sure that the correct Agent instance was passed in
         final StartFlumeAgentsMojo toTest = new StartFlumeAgentsMojo() {
-            @Override
-            protected Agent getAgent(String givenAgentName) {
-                assertThat(givenAgentName).isEqualTo(agentName);
-                return agent;
-            }
-
             @Override
             protected AgentProcess buildAgentProcess(Agent givenAgent) throws MojoExecutionException {
                 assertThat(givenAgent).isEqualTo(agent);
                 return agentProcess;
             }
         };
-        Whitebox.setInternalState(toTest, "agentNames", Collections.singletonList(agentName));
+        Whitebox.setInternalState(toTest, "agents", Collections.singletonList(agent));
         toTest.execute();
         verify(agentProcess).start();
         verifyStatic();
