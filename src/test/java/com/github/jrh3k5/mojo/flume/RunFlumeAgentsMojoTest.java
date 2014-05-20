@@ -17,48 +17,55 @@
  */
 package com.github.jrh3k5.mojo.flume;
 
+import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.verifyStatic;
+
+import java.util.Collections;
+import java.util.UUID;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.reflect.Whitebox;
 
 import com.github.jrh3k5.mojo.flume.process.AgentProcess;
-import com.github.jrh3k5.mojo.flume.process.AgentProcessContainer;
 
 /**
- * Unit tests for {@link StartFlumeAgentMojo}.
+ * Unit tests for {@link RunFlumeAgentsMojo}.
  * 
  * @author Joshua Hyde
+ * @since 2.0
  */
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ AgentProcessContainer.class, StartFlumeAgentMojo.class })
-public class StartFlumeAgentMojoTest {
+public class RunFlumeAgentsMojoTest {
     /**
-     * Test the starting of a Flume agent.
+     * Test the execution of the mojo.
      * 
      * @throws Exception
-     *             If any errors occur during the test run.
+     *             If any errors occur during the test.
      */
     @Test
     public void testExecuteMojo() throws Exception {
-        mockStatic(AgentProcessContainer.class);
+        final String agentName = UUID.randomUUID().toString();
+        final Agent agent = mock(Agent.class);
         final AgentProcess agentProcess = mock(AgentProcess.class);
-        final StartFlumeAgentMojo toTest = new StartFlumeAgentMojo() {
+
+        final RunFlumeAgentsMojo toTest = new RunFlumeAgentsMojo() {
             @Override
-            protected AgentProcess buildAgentProcess() throws MojoExecutionException {
+            protected Agent getAgent(String givenAgentName) {
+                assertThat(givenAgentName).isEqualTo(agentName);
+                return agent;
+            }
+
+            @Override
+            protected AgentProcess buildAgentProcess(Agent givenAgent) throws MojoExecutionException {
+                assertThat(givenAgent).isEqualTo(agent);
                 return agentProcess;
             }
         };
+        Whitebox.setInternalState(toTest, "agentNames", Collections.singletonList(agentName));
         toTest.execute();
         verify(agentProcess).start();
-        verifyStatic();
-        AgentProcessContainer.storeAgentProcess(agentProcess);
+        verify(agentProcess).join();
     }
 }

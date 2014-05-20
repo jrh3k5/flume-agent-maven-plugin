@@ -37,6 +37,7 @@ import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.mutable.MutableBoolean;
+import org.apache.commons.lang.mutable.MutableObject;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.ArtifactResolutionRequest;
 import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
@@ -62,17 +63,18 @@ import com.github.jrh3k5.mojo.flume.io.FlumeCopier;
 import com.github.jrh3k5.mojo.flume.process.AgentProcess;
 
 /**
- * Unit tests for {@link AbstractFlumeAgentMojo}.
+ * Unit tests for {@link AbstractFlumeAgentsMojo}.
  * 
  * @author Joshua Hyde
+ * @since 2.0
  */
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ AbstractFlumeAgentMojo.class, AgentProcess.class, ArchiveUtils.class, FlumeArchiveCache.class, FlumeCopier.class })
-public class AbstractFlumeAgentMojoTest extends AbstractUnitTest {
+@PrepareForTest({ AbstractFlumeAgentsMojo.class, AgentProcess.class, ArchiveUtils.class, FlumeArchiveCache.class, FlumeCopier.class })
+public class AbstractFlumeAgentsMojoTest extends AbstractUnitTest {
     private final String javaOpts = "-Xmx20m";
     private final String agentName = UUID.randomUUID().toString();
-    private final AbstractFlumeAgentMojo mojo = new ConcreteMojo();
+    private final AbstractFlumeAgentsMojo mojo = new ConcreteMojo();
     @Mock
     private File configFile;
     @Mock
@@ -81,6 +83,8 @@ public class AbstractFlumeAgentMojoTest extends AbstractUnitTest {
     private MavenProject project;
     @Mock
     private ArtifactResolver artifactResolver;
+    @Mock
+    private Agent agent;
     private File outputDirectory;
     private URL flumeArchiveUrl;
 
@@ -92,6 +96,10 @@ public class AbstractFlumeAgentMojoTest extends AbstractUnitTest {
      */
     @Before
     public void setUpMojo() throws Exception {
+        when(agent.getAgentName()).thenReturn(agentName);
+        when(agent.getJavaOpts()).thenReturn(javaOpts);
+        when(agent.getConfigFile()).thenReturn(configFile);
+
         flumeArchiveUrl = URI.create("http://localhost:8080/apache-flume-1.4.0-bin.tar.gz").toURL();
         outputDirectory = createTestDirectory();
         setParameters(mojo);
@@ -121,37 +129,45 @@ public class AbstractFlumeAgentMojoTest extends AbstractUnitTest {
         final MutableBoolean wroteFlumeEnvironment = new MutableBoolean(false);
         final MutableBoolean removedLibs = new MutableBoolean(false);
 
+        final List<Agent> passedAgents = new ArrayList<Agent>();
+
         final ConcreteMojo toTest = setParameters(new ConcreteMojo() {
             @Override
-            void copyFlumePlugins(File givenFlumeDirectory) throws IOException {
+            void copyFlumePlugins(Agent agent, File givenFlumeDirectory) throws IOException {
+                passedAgents.add(agent);
                 copiedPlugins.setValue(true);
                 assertThat(givenFlumeDirectory).isEqualTo(flumeDirectory);
             }
 
             @Override
-            File unpackFlume(FlumeArchiveCache archiveCache) throws IOException {
+            File unpackFlume(Agent agent, FlumeArchiveCache archiveCache) throws IOException {
+                passedAgents.add(agent);
                 unpackedFlume.setValue(true);
                 return flumeDirectory;
             }
 
             @Override
-            void writeFlumeEnvironment(File givenFlumeDirectory) throws IOException {
+            void writeFlumeEnvironment(Agent agent, File givenFlumeDirectory) throws IOException {
+                passedAgents.add(agent);
                 wroteFlumeEnvironment.setValue(true);
                 assertThat(givenFlumeDirectory).isEqualTo(flumeDirectory);
             }
 
             @Override
-            void removeLibs(File givenFlumeDirectory) throws IOException {
+            void removeLibs(Agent agent, File givenFlumeDirectory) throws IOException {
+                passedAgents.add(agent);
                 removedLibs.setValue(true);
                 assertThat(givenFlumeDirectory).isEqualTo(flumeDirectory);
             }
         });
 
-        assertThat(toTest.buildAgentProcess()).isEqualTo(agentProcess);
+        assertThat(toTest.buildAgentProcess(agent)).isEqualTo(agentProcess);
 
         assertThat(copiedPlugins.isTrue()).isTrue();
         assertThat(unpackedFlume.isTrue()).isTrue();
         assertThat(wroteFlumeEnvironment.isTrue()).isTrue();
+
+        assertThat(passedAgents).hasSize(4).containsOnly(agent);
     }
 
     /**
@@ -178,23 +194,28 @@ public class AbstractFlumeAgentMojoTest extends AbstractUnitTest {
         // So that we don't have to *actually* test the untarring/unzipping here
         mockStatic(ArchiveUtils.class);
 
+        final MutableObject capturedAgent = new MutableObject();
         final ConcreteMojo toTest = setParameters(new ConcreteMojo() {
             @Override
-            Collection<Artifact> getFlumePluginDependencies() throws IOException {
+            Collection<Artifact> getFlumePluginDependencies(Agent agent) throws IOException {
+                capturedAgent.setValue(agent);
                 return flumePluginDependencies;
             }
         });
         // Without this, the method will think there are no Flume plugins to copy
-        setFlumePlugins(toTest, Collections.<FlumePlugin> singleton(mock(FlumePlugin.class)));
+        final FlumePlugin flumePlugin = mock(FlumePlugin.class);
+        when(agent.getFlumePlugins()).thenReturn(Collections.singletonList(flumePlugin));
 
         // Actually invoke the method to be tested
-        toTest.copyFlumePlugins(flumeDirectory);
+        toTest.copyFlumePlugins(agent, flumeDirectory);
 
         final File expectedPluginsDir = new File(flumeDirectory, "plugins.d");
         // The "discovered" Flume plugin should have been "unzipped" and "untarred"
         verifyStatic();
         ArchiveUtils.gunzipFile(flumePluginFile.toURI().toURL(), flumePluginTarFile);
         ArchiveUtils.untarFile(flumePluginTarFile, expectedPluginsDir);
+
+        assertThat(capturedAgent.getValue()).isEqualTo(agent);
     }
 
     /**
@@ -207,12 +228,12 @@ public class AbstractFlumeAgentMojoTest extends AbstractUnitTest {
     public void testCopyFlumePluginsNoneSet() throws Exception {
         final ConcreteMojo toTest = setParameters(new ConcreteMojo() {
             @Override
-            Collection<Artifact> getFlumePluginDependencies() throws IOException {
+            Collection<Artifact> getFlumePluginDependencies(Agent agent) throws IOException {
                 throw new IllegalStateException("This should never get invoked.");
             }
         });
         // The absence of errors indicates that nothing happened
-        toTest.copyFlumePlugins(createTestDirectory());
+        toTest.copyFlumePlugins(agent, createTestDirectory());
     }
 
     /**
@@ -228,7 +249,7 @@ public class AbstractFlumeAgentMojoTest extends AbstractUnitTest {
 
         // Populate the list of Flume plugins for testing of the artifact filter
         final FlumePlugin flumePlugin = mock(FlumePlugin.class);
-        setFlumePlugins(mojo, Collections.<FlumePlugin> singleton(flumePlugin));
+        when(agent.getFlumePlugins()).thenReturn(Collections.singletonList(flumePlugin));
 
         // Build the node that represents the project itself
         final DependencyNode rootNode = mock(DependencyNode.class);
@@ -246,7 +267,7 @@ public class AbstractFlumeAgentMojoTest extends AbstractUnitTest {
         final ArtifactResolutionResult resolutionResult = mock(ArtifactResolutionResult.class);
         when(artifactResolver.resolve(resolutionRequestCaptor.capture())).thenReturn(resolutionResult);
 
-        assertThat(mojo.getFlumePluginDependencies()).hasSize(1).contains(childArtifact);
+        assertThat(mojo.getFlumePluginDependencies(agent)).hasSize(1).contains(childArtifact);
 
         // Verify the internals - first, the construction of the resolution request
         final ArtifactResolutionRequest resolutionRequest = resolutionRequestCaptor.getValue();
@@ -276,11 +297,12 @@ public class AbstractFlumeAgentMojoTest extends AbstractUnitTest {
         final File toKeep = new File(libDir, "tokeep.jar");
         FileUtils.touch(toKeep);
 
-        final Libs libs = Whitebox.getInternalState(mojo, "libs");
+        final Libs libs = new Libs();
         libs.setRemovals(Collections.singletonList(toRemove.getName()));
+        when(agent.getLibs()).thenReturn(libs);
 
         // The mojo should remove only the configured library
-        mojo.removeLibs(testDirectory);
+        mojo.removeLibs(agent, testDirectory);
 
         assertThat(toRemove).doesNotExist();
         assertThat(toKeep).exists();
@@ -303,7 +325,7 @@ public class AbstractFlumeAgentMojoTest extends AbstractUnitTest {
         final FlumeCopier flumeCopier = mock(FlumeCopier.class);
         when(flumeCopier.copyTo(new File(outputDirectory, agentName))).thenReturn(flumeDirectory);
         whenNew(FlumeCopier.class).withArguments(archiveCache).thenReturn(flumeCopier);
-        assertThat(mojo.unpackFlume(archiveCache)).isEqualTo(flumeDirectory);
+        assertThat(mojo.unpackFlume(agent, archiveCache)).isEqualTo(flumeDirectory);
     }
 
     /**
@@ -316,7 +338,7 @@ public class AbstractFlumeAgentMojoTest extends AbstractUnitTest {
     public void testWriteFlumeEnvironment() throws Exception {
         final ConcreteMojo toTest = setParameters(new ConcreteMojo());
         final File flumeDirectory = new File(createTestDirectory(), "flume");
-        toTest.writeFlumeEnvironment(flumeDirectory);
+        toTest.writeFlumeEnvironment(agent, flumeDirectory);
         final File confDirectory = new File(flumeDirectory, "conf");
         assertThat(confDirectory).exists();
         final File flumeEnvSh = new File(confDirectory, "flume-env.sh");
@@ -328,41 +350,26 @@ public class AbstractFlumeAgentMojoTest extends AbstractUnitTest {
      * Decorate the internals of the given plugin with usable values.
      * 
      * @param mojo
-     *            The {@link AbstractFlumeAgentMojo} to be decorated.
+     *            The {@link AbstractFlumeAgentsMojo} to be decorated.
      * @return The given mojo class.
      */
-    private <T extends AbstractFlumeAgentMojo> T setParameters(T mojo) {
-        Whitebox.setInternalState(mojo, "agentName", agentName);
-        Whitebox.setInternalState(mojo, "configFile", configFile);
+    private <T extends AbstractFlumeAgentsMojo> T setParameters(T mojo) {
         Whitebox.setInternalState(mojo, "dependencyGraphBuilder", dependencyGraphBuilder);
         Whitebox.setInternalState(mojo, "project", project);
         Whitebox.setInternalState(mojo, "artifactResolver", artifactResolver);
         Whitebox.setInternalState(mojo, "outputDirectory", outputDirectory);
-        Whitebox.setInternalState(mojo, "javaOpts", javaOpts);
         Whitebox.setInternalState(mojo, "outputEncoding", "utf-8");
         Whitebox.setInternalState(mojo, "flumeArchiveUrl", flumeArchiveUrl);
         return mojo;
     }
 
     /**
-     * Set the stored Flume plugins in the given
-     * 
-     * @param mojo
-     * @param flumePlugins
-     * @return
-     */
-    private <T extends AbstractFlumeAgentMojo> T setFlumePlugins(T mojo, Collection<FlumePlugin> flumePlugins) {
-        Whitebox.setInternalState(mojo, "flumePlugins", Collections.unmodifiableList(flumePlugins instanceof List ? (List<FlumePlugin>) flumePlugins : new ArrayList<FlumePlugin>(flumePlugins)));
-        return mojo;
-    }
-
-    /**
-     * Simple implementation of {@link AbstractFlumeAgentMojo} for testing purposes.
+     * Simple implementation of {@link AbstractFlumeAgentsMojo} for testing purposes.
      * 
      * @author jh016266
      * @since 4.0
      */
-    private static class ConcreteMojo extends AbstractFlumeAgentMojo {
+    private static class ConcreteMojo extends AbstractFlumeAgentsMojo {
         @Override
         public void execute() throws MojoExecutionException, MojoFailureException {
             // no-op

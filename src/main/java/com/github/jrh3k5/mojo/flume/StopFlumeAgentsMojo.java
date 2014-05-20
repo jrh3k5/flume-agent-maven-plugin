@@ -17,38 +17,37 @@
  */
 package com.github.jrh3k5.mojo.flume;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import java.util.Collections;
+import java.util.List;
 
+import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.junit.Test;
+import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 
-import com.github.jrh3k5.mojo.flume.process.AgentProcess;
+import com.github.jrh3k5.mojo.flume.process.AgentProcessContainer;
 
 /**
- * Unit tests for {@link RunFlumeAgentMojo}.
+ * A mojo used to stop Flume agents.
  * 
  * @author Joshua Hyde
+ * @since 2.0
  */
 
-public class RunFlumeAgentMojoTest {
+@Mojo(name = "stop", defaultPhase = LifecyclePhase.POST_INTEGRATION_TEST)
+public class StopFlumeAgentsMojo extends AbstractMojo {
     /**
-     * Test the execution of the mojo.
-     * 
-     * @throws Exception
-     *             If any errors occur during the test.
+     * The names of the agents to be stopped.
      */
-    @Test
-    public void testExecuteMojo() throws Exception {
-        final AgentProcess agentProcess = mock(AgentProcess.class);
-        final RunFlumeAgentMojo toTest = new RunFlumeAgentMojo() {
-            @Override
-            protected AgentProcess buildAgentProcess() throws MojoExecutionException {
-                return agentProcess;
-            }
-        };
-        toTest.execute();
-        verify(agentProcess).start();
-        verify(agentProcess).join();
+    @Parameter(required = true)
+    private List<String> agentNames = Collections.emptyList();
+
+    @Override
+    public void execute() throws MojoExecutionException, MojoFailureException {
+        for (String agentName : agentNames) {
+            AgentProcessContainer.stopAgentProcess(agentName);
+        }
     }
 }

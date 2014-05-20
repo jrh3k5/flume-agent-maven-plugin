@@ -52,62 +52,15 @@ import com.github.jrh3k5.mojo.flume.process.AgentProcess;
  * Abstract definition of a mojo that manages a Flume agent.
  * 
  * @author Joshua Hyde
+ * @since 2.0
  */
 
-public abstract class AbstractFlumeAgentMojo extends AbstractMojo {
-    /**
-     * The name of the agent to be executed.
-     */
-    @Parameter(required = true)
-    private String agentName;
-
-    /**
-     * The configuration file to be supplied to the agent.
-     */
-    @Parameter(required = true)
-    private File configFile;
-
+public abstract class AbstractFlumeAgentsMojo extends AbstractMojo {
     /**
      * The directory to which the installation of the Flume agent should be extracted.
      */
     @Parameter(defaultValue = "${project.build.directory}/apache-flume")
     private File outputDirectory;
-
-    /**
-     * Definition of objects that will be unpacked and copied as plugins for Flume into the installation directory.
-     * <p />
-     * Configurations of this can look like:
-     * 
-     * <pre>
-     *  &lt;flumePlugins&gt;
-     *      &lt;flumePlugin&gt;
-     *          &lt;groupId&gt;com.cerner.test&lt;/groupId&gt;
-     *          &lt;artifactId&gt;some-flume-plugin&lt;/artifactId&gt;
-     *      &lt;/flumePlugin&gt;
-     *  &lt;/flumePlugins&gt;
-     * </pre>
-     * 
-     * This will match a dependency defined as:
-     * 
-     * <pre>
-     *  &lt;dependency&gt;
-     *      &lt;groupId&gt;com.cerner.test&lt;/groupId&gt;
-     *      &lt;artifactId&gt;some-flume-plugin&lt;/artifactId&gt;
-     *      &lt;classifier&gt;flume-plugin&lt;/classifier&gt;
-     *      &lt;type&gt;tar.gz&lt;/type&gt;
-     *  &lt;/dependency&gt;
-     * </pre>
-     * 
-     * Please be conscious of the expected classifier and type.
-     */
-    @Parameter
-    private List<FlumePlugin> flumePlugins = Collections.emptyList();
-
-    /**
-     * The value to be set as the {@code JAVA_OPTS} parameter in the Flume environment.
-     */
-    @Parameter(required = true, defaultValue = "-Xmx20m")
-    private String javaOpts;
 
     /**
      * The encoding to be used when writing any text data to disk.
@@ -120,24 +73,6 @@ public abstract class AbstractFlumeAgentMojo extends AbstractMojo {
      */
     @Parameter(required = true, defaultValue = "http://archive.apache.org/dist/flume/1.4.0/apache-flume-1.4.0-bin.tar.gz")
     private URL flumeArchiveUrl;
-
-    /**
-     * This configures any changes that are to be made to the {@code libs/} directory in the Flume installation.
-     * <p />
-     * For example, to remove the {@code libthrift-0.7.0.jar} library from the {@code lib/} directory, you might provide a configuration that looks like:
-     * 
-     * <pre>
-     * &lt;libs&gt;
-     *   &lt;removals&gt;
-     *     &lt;removal&gt;libthrift-0.7.0.jar&lt;/removal&gt;
-     *   &lt;/removals&gt;
-     * &lt;/libs&gt;
-     * </pre>
-     * 
-     * @since 1.1
-     */
-    @Parameter
-    private Libs libs = new Libs();
 
     /**
      * The Maven project descriptor.
@@ -158,54 +93,55 @@ public abstract class AbstractFlumeAgentMojo extends AbstractMojo {
     private DependencyGraphBuilder dependencyGraphBuilder;
 
     /**
-     * Get the name of the agent to be executed.
-     * 
-     * @return The name of the agent.
+     * The configuration of agents to be run, expressed as {@link Agent} objects.
      */
-    protected String getAgentName() {
-        return agentName;
-    }
+    @Parameter(required = true)
+    private List<Agent> agents = Collections.emptyList();
 
-    /**
-     * Get the location of the configuration file for the Flume agent.
-     * 
-     * @return A {@link File} used to describe the location of the configuration file for the Flume agent.
-     */
-    protected File getConfigFile() {
-        return configFile;
+    // TODO: document, test
+    protected Agent getAgent(String agentName) {
+        for (Agent agent : agents) {
+            if (agentName.equals(agent.getAgentName())) {
+                return agent;
+            }
+        }
+
+        return null;
     }
 
     /**
      * Build the agent process.
      * 
+     * @param agent
+     *            The {@link Agent} for which a process is to be built.
      * @return An {@link AgentProcess} describing the agent process.
      * @throws MojoExecutionException
      *             If any errors occur while building the agent process.
      */
-    protected AgentProcess buildAgentProcess() throws MojoExecutionException {
+    protected AgentProcess buildAgentProcess(Agent agent) throws MojoExecutionException {
         File flumeDirectory;
         try {
-            flumeDirectory = unpackFlume(new FlumeArchiveCache(flumeArchiveUrl));
+            flumeDirectory = unpackFlume(agent, new FlumeArchiveCache(flumeArchiveUrl));
         } catch (IOException e) {
             throw new MojoExecutionException("Failed to unpack Flume.", e);
         }
         try {
-            copyFlumePlugins(flumeDirectory);
+            copyFlumePlugins(agent, flumeDirectory);
         } catch (IOException e) {
             throw new MojoExecutionException("Failed to copy all Flume plugins.", e);
         }
         try {
-            writeFlumeEnvironment(flumeDirectory);
+            writeFlumeEnvironment(agent, flumeDirectory);
         } catch (IOException e) {
             throw new MojoExecutionException("Error writing Flume environment to directory: " + flumeDirectory.getAbsolutePath(), e);
         }
         try {
-            removeLibs(flumeDirectory);
+            removeLibs(agent, flumeDirectory);
         } catch (IOException e) {
             throw new MojoExecutionException("Failed to remove libs.", e);
         }
         final AgentProcess.Builder builder = AgentProcess.newBuilder(flumeDirectory);
-        return builder.withAgent(getAgentName()).withConfigFile(getConfigFile()).build();
+        return builder.withAgent(agent.getAgentName()).withConfigFile(agent.getConfigFile()).build();
     }
 
     /**
@@ -213,18 +149,20 @@ public abstract class AbstractFlumeAgentMojo extends AbstractMojo {
      * <p />
      * This is intentionally made package-private to expose it for testing purposes.
      * 
+     * @param agent
+     *            The {@link Agent} whose Flume plugins are to be installed.
      * @param flumeDirectory
      *            A {@link File} representing the directory in which Flume is installed.
      * @throws IOException
      *             If any errors occur during the copying.
      */
-    void copyFlumePlugins(File flumeDirectory) throws IOException {
-        if (flumePlugins.isEmpty()) {
+    void copyFlumePlugins(Agent agent, File flumeDirectory) throws IOException {
+        if (agent.getFlumePlugins().isEmpty()) {
             return;
         }
 
         final File pluginsDir = new File(flumeDirectory, "plugins.d");
-        for (Artifact pluginArtifact : getFlumePluginDependencies()) {
+        for (Artifact pluginArtifact : getFlumePluginDependencies(agent)) {
             final URL pluginUrl = pluginArtifact.getFile().toURI().toURL();
             final File tarFile = removeFinalExtension(pluginArtifact.getFile());
             gunzipFile(pluginUrl, tarFile);
@@ -237,13 +175,15 @@ public abstract class AbstractFlumeAgentMojo extends AbstractMojo {
      * <p />
      * This is intentionally made package-private to expose it for testing purposes.
      * 
+     * @param agent
+     *            The {@link Agent} whose Flume plugins are to be resolved.
      * @return A {@link Collection} of {@link Artifact} objects representing the given Flume plugins as project dependencies.
      * @throws IOException
      *             If any errors occur during the plugin retrieval.
      */
-    Collection<Artifact> getFlumePluginDependencies() throws IOException {
+    Collection<Artifact> getFlumePluginDependencies(Agent agent) throws IOException {
         try {
-            final DependencyNode rootNode = dependencyGraphBuilder.buildDependencyGraph(project, new FlumePluginsArtifactFilter(flumePlugins));
+            final DependencyNode rootNode = dependencyGraphBuilder.buildDependencyGraph(project, new FlumePluginsArtifactFilter(agent.getFlumePlugins()));
             final List<Artifact> artifacts = new ArrayList<Artifact>(rootNode.getChildren().size());
             for (DependencyNode childNode : rootNode.getChildren()) {
                 final Artifact artifact = childNode.getArtifact();
@@ -262,17 +202,18 @@ public abstract class AbstractFlumeAgentMojo extends AbstractMojo {
     /**
      * Remove any libraries from the {@code lib/} directory in the given Flume installation directory.
      * 
+     * @param agent
+     *            The {@link Agent} whose installation's {@code lib/} directory is to be modified.
      * @param flumeDirectory
-     *            A {@link File} representing the directory in which a Flume agent - fro which the configured libraries are to be removed - is installed.
+     *            A {@link File} representing the directory in which a Flume agent - for which the configured libraries are to be removed - is installed.
      * @throws IOException
      *             If any errors occur during the removal.
-     * @since 1.1
      */
-    void removeLibs(File flumeDirectory) throws IOException {
+    void removeLibs(Agent agent, File flumeDirectory) throws IOException {
         final File libDir = new File(flumeDirectory, "lib");
         final Log log = getLog();
         final boolean isDebugEnabled = log.isDebugEnabled();
-        for (String removal : libs.getRemovals()) {
+        for (String removal : agent.getLibs().getRemovals()) {
             final File lib = new File(libDir, removal);
             if (lib.exists()) {
                 if (isDebugEnabled) {
@@ -290,40 +231,45 @@ public abstract class AbstractFlumeAgentMojo extends AbstractMojo {
      * <p />
      * This is intentionally made package-private to expose it for testing purposes.
      * 
+     * @param agent
+     *            The {@link Agent} for which the Flume installation is to be unpacked.
      * @param archiveCache
      *            A {@link FlumeArchiveCache} that informs the plugin of where to get the Flume archive.
      * @return A {@link File} representing the location of the Flume installation.
      * @throws IOException
      *             If any errors occur during the unpacking.
      */
-    File unpackFlume(FlumeArchiveCache archiveCache) throws IOException {
-        return new FlumeCopier(archiveCache).copyTo(getAgentDirectory());
+    File unpackFlume(Agent agent, FlumeArchiveCache archiveCache) throws IOException {
+        return new FlumeCopier(archiveCache).copyTo(getAgentDirectory(agent));
     }
 
     /**
      * Write the Flume environment to the configuration directory.
      * 
+     * @param agent
+     *            The {@link Agent} whose environment is to be modified.
      * @param flumeDirectory
      *            A {@link File} representing the directory to which the Flume environment configuration will be written.
      * @throws IOException
      *             If any errors occur while writing the Flume environment.
      */
-    void writeFlumeEnvironment(File flumeDirectory) throws IOException {
+    void writeFlumeEnvironment(Agent agent, File flumeDirectory) throws IOException {
         final File confDir = new File(flumeDirectory, "conf");
         FileUtils.forceMkdir(confDir);
-        FileUtils.fileWrite(new File(confDir, "flume-env.sh"), outputEncoding, String.format("JAVA_OPTS=\"%s\"", javaOpts));
+        FileUtils.fileWrite(new File(confDir, "flume-env.sh"), outputEncoding, String.format("JAVA_OPTS=\"%s\"", agent.getJavaOpts()));
     }
 
     /**
      * Get the directory into which the agent will be installed.
      * 
+     * @param agent
+     *            The {@link Agent} whose installation directory is to be retrieved.
      * @return A {@link File} representing the directory into which the agent will be installed.
      * @throws IOException
      *             If any errors occur while creating the agent directory.
-     * @since 1.2
      */
-    private File getAgentDirectory() throws IOException {
-        final File agentDirectory = new File(outputDirectory, getAgentName());
+    private File getAgentDirectory(Agent agent) throws IOException {
+        final File agentDirectory = new File(outputDirectory, agent.getAgentName());
         if (!agentDirectory.exists()) {
             FileUtils.forceMkdir(agentDirectory);
         }
@@ -362,8 +308,7 @@ public abstract class AbstractFlumeAgentMojo extends AbstractMojo {
     /**
      * An {@link ArtifactFilter} that filters out any artifact that don't match the given set of Flume plugins.
      * 
-     * @author jh016266
-     * @since 4.0
+     * @author Joshua Hyde
      */
     private static class FlumePluginsArtifactFilter implements ArtifactFilter {
         private final Collection<FlumePlugin> flumePlugins;
