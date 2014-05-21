@@ -22,7 +22,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.UUID;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.Artifact;
 import org.junit.Before;
 import org.junit.Test;

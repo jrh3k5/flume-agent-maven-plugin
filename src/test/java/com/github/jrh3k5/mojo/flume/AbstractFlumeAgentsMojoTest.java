@@ -36,8 +36,8 @@ import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.mutable.MutableBoolean;
-import org.apache.commons.lang.mutable.MutableObject;
+import org.apache.commons.lang3.mutable.MutableBoolean;
+import org.apache.commons.lang3.mutable.MutableObject;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.ArtifactResolutionRequest;
 import org.apache.maven.artifact.resolver.ArtifactResolutionResult;
@@ -194,7 +194,7 @@ public class AbstractFlumeAgentsMojoTest extends AbstractUnitTest {
         // So that we don't have to *actually* test the untarring/unzipping here
         mockStatic(ArchiveUtils.class);
 
-        final MutableObject capturedAgent = new MutableObject();
+        final MutableObject<Agent> capturedAgent = new MutableObject<Agent>();
         final ConcreteMojo toTest = setParameters(new ConcreteMojo() {
             @Override
             Collection<Artifact> getFlumePluginDependencies(Agent agent) throws IOException {

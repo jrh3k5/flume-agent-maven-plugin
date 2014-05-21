@@ -17,7 +17,7 @@
  */
 package com.github.jrh3k5.mojo.flume;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.maven.artifact.Artifact;
 
 /**
