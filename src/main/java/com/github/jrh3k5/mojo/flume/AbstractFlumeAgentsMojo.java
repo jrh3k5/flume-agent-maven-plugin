@@ -75,6 +75,16 @@ public abstract class AbstractFlumeAgentsMojo extends AbstractMojo {
     private URL flumeArchiveUrl;
 
     /**
+     * The MD5 hash of the Flume archive to be downloaded.
+     * <p />
+     * Be aware that Flume's released MD5 hashes are signed using PGP; this mojo does <b>not</b> support verification of those hashes.
+     * 
+     * @since 2.1
+     */
+    @Parameter(required = true, defaultValue = "f0742b1b4dcb801dad544cfa49154d0e")
+    private String flumeArchiveMd5;
+
+    /**
      * The Maven project descriptor.
      */
     @Parameter(defaultValue = "${project}", readonly = true, required = true)
@@ -98,7 +108,12 @@ public abstract class AbstractFlumeAgentsMojo extends AbstractMojo {
     @Parameter(required = true)
     private List<Agent> agents = Collections.emptyList();
 
-    // TODO: document, test
+    /**
+     * Get the agents configured for the plugin.
+     * 
+     * @return A {@link List} of {@link Agent} objects representing the agents configured for the plugin.
+     * @since 2.0
+     */
     protected List<Agent> getAgents() {
         return Collections.unmodifiableList(agents);
     }
@@ -115,7 +130,7 @@ public abstract class AbstractFlumeAgentsMojo extends AbstractMojo {
     protected AgentProcess buildAgentProcess(Agent agent) throws MojoExecutionException {
         File flumeDirectory;
         try {
-            flumeDirectory = unpackFlume(agent, new FlumeArchiveCache(flumeArchiveUrl));
+            flumeDirectory = unpackFlume(agent, new FlumeArchiveCache(flumeArchiveUrl, flumeArchiveMd5));
         } catch (IOException e) {
             throw new MojoExecutionException("Failed to unpack Flume.", e);
         }

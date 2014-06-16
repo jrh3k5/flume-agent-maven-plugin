@@ -72,6 +72,7 @@ import com.github.jrh3k5.mojo.flume.process.AgentProcess;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ AbstractFlumeAgentsMojo.class, AgentProcess.class, ArchiveUtils.class, FlumeArchiveCache.class, FlumeCopier.class })
 public class AbstractFlumeAgentsMojoTest extends AbstractUnitTest {
+    private final String flumeArchiveMd5 = UUID.randomUUID().toString();
     private final String javaOpts = "-Xmx20m";
     private final String agentName = UUID.randomUUID().toString();
     private final AbstractFlumeAgentsMojo mojo = new ConcreteMojo();
@@ -318,7 +319,7 @@ public class AbstractFlumeAgentsMojoTest extends AbstractUnitTest {
     public void testUnpackFlume() throws Exception {
         final URL resolvedUrl = new File(createTestDirectory(), UUID.randomUUID().toString() + ".tar.gz").toURI().toURL();
         final FlumeArchiveCache archiveCache = mock(FlumeArchiveCache.class);
-        whenNew(FlumeArchiveCache.class).withArguments(flumeArchiveUrl).thenReturn(archiveCache);
+        whenNew(FlumeArchiveCache.class).withArguments(flumeArchiveUrl, flumeArchiveMd5).thenReturn(archiveCache);
         when(archiveCache.getArchiveLocation()).thenReturn(resolvedUrl);
 
         final File flumeDirectory = new File(createTestDirectory(), "flume");
@@ -360,6 +361,7 @@ public class AbstractFlumeAgentsMojoTest extends AbstractUnitTest {
         Whitebox.setInternalState(mojo, "outputDirectory", outputDirectory);
         Whitebox.setInternalState(mojo, "outputEncoding", "utf-8");
         Whitebox.setInternalState(mojo, "flumeArchiveUrl", flumeArchiveUrl);
+        Whitebox.setInternalState(mojo, "flumeArchiveMd5", flumeArchiveMd5);
         return mojo;
     }
 

@@ -127,10 +127,11 @@ This tells the plugin to look for a dependency in your project matching the give
 
 #### Change Source of Flume Archive
 
-By default, the plugin downloads (and then caches) the archive of Flume from the [Apache archives](http://archive.apache.org/dist/flume/). If for some reason that URL is unavailable to you or the default version that the plugin uses is not suitable to your needs, you can change the location from which plugin downloads Flume by setting the `flumeArchiveUrl` parameter, like so:
+By default, the plugin downloads (and then caches) the archive of Flume from the [Apache archives](http://archive.apache.org/dist/flume/). If for some reason that URL is unavailable to you or the default version that the plugin uses is not suitable to your needs, you can change the location from which plugin downloads Flume by setting the `flumeArchiveUrl` and `flumeArchiveMd5` parameters, like so:
 
 ```
 <configuration>
     <flumeArchiveUrl>http://archive.apache.org/dist/flume/1.3.1/apache-flume-1.3.1-bin.tar.gz</flumeArchiveUrl>
+    <flumeArchiveMd5>09362a5a8ed92c6fb0bfbdb2802301db</flumeArchiveMd5>
 </configuration>
 ```
