@@ -66,7 +66,7 @@ public class FlumeArchiveCache {
         if (flumeCache.exists()) {
             final String fileHash = Files.hash(flumeCache, Hashing.md5()).toString();
             if (!fileHash.equals(md5Hash)) {
-                LOGGER.warn("The local Flume archive copy has a hash of {}, but expected a hash of {}. It will be downloaded again.", md5Hash, fileHash);
+                LOGGER.warn("The local Flume archive copy has a hash of {}, but expected a hash of {}. It will be downloaded again.", fileHash, md5Hash);
                 FileUtils.forceDelete(flumeCache);
             } else {
                 return flumeCache.toURI().toURL();
