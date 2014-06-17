@@ -129,6 +129,7 @@ public class AbstractFlumeAgentsMojoTest extends AbstractUnitTest {
         final MutableBoolean unpackedFlume = new MutableBoolean(false);
         final MutableBoolean wroteFlumeEnvironment = new MutableBoolean(false);
         final MutableBoolean removedLibs = new MutableBoolean(false);
+        final MutableBoolean copiedLoggingProperties = new MutableBoolean(false);
 
         final List<Agent> passedAgents = new ArrayList<Agent>();
 
@@ -136,28 +137,35 @@ public class AbstractFlumeAgentsMojoTest extends AbstractUnitTest {
             @Override
             void copyFlumePlugins(Agent agent, File givenFlumeDirectory) throws IOException {
                 passedAgents.add(agent);
-                copiedPlugins.setValue(true);
+                copiedPlugins.setTrue();
                 assertThat(givenFlumeDirectory).isEqualTo(flumeDirectory);
             }
 
             @Override
             File unpackFlume(Agent agent, FlumeArchiveCache archiveCache) throws IOException {
                 passedAgents.add(agent);
-                unpackedFlume.setValue(true);
+                unpackedFlume.setTrue();
                 return flumeDirectory;
             }
 
             @Override
             void writeFlumeEnvironment(Agent agent, File givenFlumeDirectory) throws IOException {
                 passedAgents.add(agent);
-                wroteFlumeEnvironment.setValue(true);
+                wroteFlumeEnvironment.setTrue();
                 assertThat(givenFlumeDirectory).isEqualTo(flumeDirectory);
             }
 
             @Override
             void removeLibs(Agent agent, File givenFlumeDirectory) throws IOException {
                 passedAgents.add(agent);
-                removedLibs.setValue(true);
+                removedLibs.setTrue();
+                assertThat(givenFlumeDirectory).isEqualTo(flumeDirectory);
+            }
+
+            @Override
+            void copyLoggingProperties(Agent agent, File givenFlumeDirectory) throws IOException {
+                passedAgents.add(agent);
+                copiedLoggingProperties.setTrue();
                 assertThat(givenFlumeDirectory).isEqualTo(flumeDirectory);
             }
         });
@@ -168,7 +176,7 @@ public class AbstractFlumeAgentsMojoTest extends AbstractUnitTest {
         assertThat(unpackedFlume.isTrue()).isTrue();
         assertThat(wroteFlumeEnvironment.isTrue()).isTrue();
 
-        assertThat(passedAgents).hasSize(4).containsOnly(agent);
+        assertThat(passedAgents).hasSize(5).containsOnly(agent);
     }
 
     /**
@@ -279,6 +287,49 @@ public class AbstractFlumeAgentsMojoTest extends AbstractUnitTest {
         when(flumePlugin.matches(childArtifact)).thenReturn(Boolean.TRUE);
         assertThat(artifactFilter.include(childArtifact)).isTrue();
         assertThat(artifactFilter.include(mock(Artifact.class))).isFalse();
+    }
+
+    /**
+     * Test the copying of logging properties.
+     * 
+     * @throws Exception
+     *             If any errors occur during the test run.
+     * @since 2.1.1
+     */
+    @Test
+    public void testCopyLoggingProperties() throws Exception {
+        final File unitTestDir = new File(String.format("target/unit-tests/%s/testCopyLoggingProperties/%s", getClass().getSimpleName(), UUID.randomUUID()));
+        final File flumeDirectory = new File(unitTestDir, "flume");
+        final File loggingProperties = new File(unitTestDir, "logging.properties");
+        final String loggingPropertiesText = UUID.randomUUID().toString();
+        FileUtils.writeLines(loggingProperties, Collections.singleton(loggingPropertiesText));
+
+        when(agent.getLoggingProperties()).thenReturn(loggingProperties);
+        mojo.copyLoggingProperties(agent, flumeDirectory);
+
+        // The file should have been copied to conf/log4j.properties beneath the Flume directory
+        final File expectedLoggingProperties = new File(flumeDirectory, "conf/log4j.properties");
+        assertThat(expectedLoggingProperties).exists();
+        // Trim, because FileUtils.writeLines() adds newline characters
+        assertThat(FileUtils.readFileToString(expectedLoggingProperties).trim()).isEqualTo(loggingPropertiesText);
+    }
+
+    /**
+     * Test the copying of logging properties when none are provided.
+     * 
+     * @throws Exception
+     *             If any errors occur during the test run.
+     * @since 2.1.1
+     */
+    @Test
+    public void testCopyLoggingPropertiesNoneProvided() throws Exception {
+        final File unitTestDir = new File(String.format("target/unit-tests/%s/testCopyLoggingProperties/%s", getClass().getSimpleName(), UUID.randomUUID()));
+        final File flumeDirectory = new File(unitTestDir, "flume");
+        FileUtils.forceMkdir(flumeDirectory);
+
+        mojo.copyLoggingProperties(agent, flumeDirectory);
+
+        assertThat(flumeDirectory.listFiles()).isEmpty();
     }
 
     /**

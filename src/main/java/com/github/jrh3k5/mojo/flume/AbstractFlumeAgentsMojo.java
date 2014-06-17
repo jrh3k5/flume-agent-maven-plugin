@@ -140,6 +140,11 @@ public abstract class AbstractFlumeAgentsMojo extends AbstractMojo {
             throw new MojoExecutionException("Failed to copy all Flume plugins.", e);
         }
         try {
+            copyLoggingProperties(agent, flumeDirectory);
+        } catch (IOException e) {
+            throw new MojoExecutionException("Failed to copy the Flume logging properties.", e);
+        }
+        try {
             writeFlumeEnvironment(agent, flumeDirectory);
         } catch (IOException e) {
             throw new MojoExecutionException("Error writing Flume environment to directory: " + flumeDirectory.getAbsolutePath(), e);
@@ -177,6 +182,26 @@ public abstract class AbstractFlumeAgentsMojo extends AbstractMojo {
             gunzipFile(pluginUrl, tarFile);
             untarFile(tarFile, pluginsDir);
         }
+    }
+
+    /**
+     * Copy the configured logging properties, if provided, into the Flume installation.
+     * 
+     * @param agent
+     *            An {@link Agent} object describing the agent configuration.
+     * @param flumeDirectory
+     *            A {@link File} object representing the location of the Flume installation.
+     * @throws IOException
+     *             If any errors occur during the copying.
+     * @since 2.1.1
+     */
+    void copyLoggingProperties(Agent agent, File flumeDirectory) throws IOException {
+        if (agent.getLoggingProperties() == null) {
+            return;
+        }
+
+        final File confDir = new File(flumeDirectory, "conf");
+        FileUtils.copyFile(agent.getLoggingProperties(), new File(confDir, "log4j.properties"));
     }
 
     /**

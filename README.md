@@ -135,3 +135,19 @@ By default, the plugin downloads (and then caches) the archive of Flume from the
     <flumeArchiveMd5>09362a5a8ed92c6fb0bfbdb2802301db</flumeArchiveMd5>
 </configuration>
 ```
+
+#### Logging Configuration
+
+Starting with version 2.1.1 of the plugin, you can specify a logging configuration to be used by an agent like so:
+
+```
+<configuration>
+    <agents>
+        <agent>
+            <loggingProperties>/some/location/of/logging.properties</loggingProperties>
+        </agent>
+    </agents>
+</configuration>
+```
+
+This is expected to conform to the logging implementation used by your selected version of Flume.

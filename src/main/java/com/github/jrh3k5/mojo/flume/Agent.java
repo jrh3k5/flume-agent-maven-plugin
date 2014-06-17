@@ -33,6 +33,7 @@ public class Agent {
     private String agentName;
     private File configFile;
     private String javaOpts = "-Xmx20m";
+    private File loggingProperties;
     private Libs libs = new Libs();
 
     /**
@@ -78,6 +79,17 @@ public class Agent {
      */
     public Libs getLibs() {
         return libs;
+    }
+
+    /**
+     * Get the file contining the logging configuration properties.
+     * 
+     * @return {@code null} if no logging properties file has been provided and Flume's default configuration should be used; otherwise, a {@link File} representing the location of a file describing
+     *         the properties of the Flume agent logging configuration to be used.
+     * @since 2.1.1
+     */
+    public File getLoggingProperties() {
+        return loggingProperties;
     }
 
     /**
@@ -128,5 +140,17 @@ public class Agent {
      */
     public void setLibs(Libs libs) {
         this.libs = libs;
+    }
+
+    /**
+     * Set the file contining the logging configuration properties.
+     * 
+     * @param loggingProperties
+     *            {@code null} if no logging properties file has been provided and Flume's default configuration should be used; otherwise, a {@link File} representing the location of a file
+     *            describing the properties of the Flume agent logging configuration to be used.
+     * @since 2.1.1
+     */
+    public void setLoggingProperties(File loggingProperties) {
+        this.loggingProperties = loggingProperties;
     }
 }
