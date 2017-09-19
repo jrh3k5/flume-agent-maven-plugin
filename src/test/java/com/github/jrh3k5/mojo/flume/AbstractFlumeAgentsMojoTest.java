@@ -131,7 +131,7 @@ public class AbstractFlumeAgentsMojoTest extends AbstractUnitTest {
         final MutableBoolean removedLibs = new MutableBoolean(false);
         final MutableBoolean copiedLoggingProperties = new MutableBoolean(false);
 
-        final List<Agent> passedAgents = new ArrayList<Agent>();
+        final List<Agent> passedAgents = new ArrayList<>();
 
         final ConcreteMojo toTest = setParameters(new ConcreteMojo() {
             @Override
@@ -203,7 +203,7 @@ public class AbstractFlumeAgentsMojoTest extends AbstractUnitTest {
         // So that we don't have to *actually* test the untarring/unzipping here
         mockStatic(ArchiveUtils.class);
 
-        final MutableObject<Agent> capturedAgent = new MutableObject<Agent>();
+        final MutableObject<Agent> capturedAgent = new MutableObject<>();
         final ConcreteMojo toTest = setParameters(new ConcreteMojo() {
             @Override
             Collection<Artifact> getFlumePluginDependencies(Agent agent) throws IOException {

@@ -30,7 +30,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 
 public class AgentProcessContainer {
-    private static final Map<String, AgentProcess> AGENT_PROCESSES = new HashMap<String, AgentProcess>();
+    private static final Map<String, AgentProcess> AGENT_PROCESSES = new HashMap<>();
     private static final ReadWriteLock PROCESSES_LOCK = new ReentrantReadWriteLock();
 
     /**

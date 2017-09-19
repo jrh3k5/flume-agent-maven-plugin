@@ -65,7 +65,7 @@ public abstract class AbstractUnitTest {
      * 
      * @return The current test's name.
      */
-    protected String getTestName() {
+    String getTestName() {
         return testName.getMethodName();
     }
 }

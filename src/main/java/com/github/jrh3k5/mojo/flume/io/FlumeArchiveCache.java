@@ -72,15 +72,9 @@ public class FlumeArchiveCache {
                 return flumeCache.toURI().toURL();
             }
         }
-        
-        final InputStream urlIn = archiveUrl.openStream();
-        FileOutputStream fileOut = null;
-        try {
-            fileOut = new FileOutputStream(flumeCache);
+
+        try (final InputStream urlIn = archiveUrl.openStream(); final FileOutputStream fileOut = new FileOutputStream(flumeCache)) {
             IOUtils.copy(urlIn, fileOut);
-        } finally {
-            IOUtils.closeQuietly(fileOut);
-            IOUtils.closeQuietly(urlIn);
         }
 
         return flumeCache.toURI().toURL();
@@ -91,7 +85,7 @@ public class FlumeArchiveCache {
      * 
      * @return The version of Flume in use.
      */
-    public String getFlumeVersion() {
+    String getFlumeVersion() {
         return flumeVersion;
     }
 }

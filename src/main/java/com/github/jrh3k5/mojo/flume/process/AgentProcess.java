@@ -111,7 +111,7 @@ public class AgentProcess {
     /**
      * Stop the Flume agent process.
      */
-    public void stop() {
+    void stop() {
         if (process != null) {
             process.destroy();
             process = null;
@@ -172,7 +172,7 @@ public class AgentProcess {
      * @return A {@link List} of {@link String} objects representing the process arguments to be used.
      */
     private List<String> getProcessArgs() {
-        final List<String> processArgs = new ArrayList<String>((arguments.size() * 2) + 2);
+        final List<String> processArgs = new ArrayList<>((arguments.size() * 2) + 2);
         processArgs.add("bin/flume-ng");
         processArgs.add("agent");
         for (Entry<AgentArguments, String> argument : arguments.entrySet()) {
@@ -188,7 +188,7 @@ public class AgentProcess {
      * @author Joshua Hyde
      */
     public static class Builder {
-        private final Map<AgentArguments, String> arguments = new EnumMap<AgentArguments, String>(AgentArguments.class);
+        private final Map<AgentArguments, String> arguments = new EnumMap<>(AgentArguments.class);
         private final File flumeDirectory;
 
         /**
@@ -249,7 +249,7 @@ public class AgentProcess {
      * 
      * @author Joshua Hyde
      */
-    private static enum AgentArguments {
+    private enum AgentArguments {
         /**
          * The name of the agent.
          */
@@ -272,7 +272,7 @@ public class AgentProcess {
          * @param argumentName
          *            The name of the argument as it is used on the command line.
          */
-        private AgentArguments(String argumentName) {
+        AgentArguments(String argumentName) {
             this(argumentName, true);
         }
 
@@ -284,7 +284,7 @@ public class AgentProcess {
          * @param required
          *            A {@code boolean} field that determines whether or not the field is required.
          */
-        private AgentArguments(String argumentName, boolean required) {
+        AgentArguments(String argumentName, boolean required) {
             this.argumentName = argumentName;
             this.required = required;
         }
@@ -322,7 +322,7 @@ public class AgentProcess {
          * @param agentProcess
          *            The {@link AgentProcess} to be stopped.
          */
-        public FlumeShutdownRunnable(AgentProcess agentProcess) {
+        FlumeShutdownRunnable(AgentProcess agentProcess) {
             this.agentProcess = agentProcess;
         }
     

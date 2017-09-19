@@ -43,22 +43,15 @@ public class ArchiveUtils {
      *            A {@link File} representing the location to which the unzipped file should be placed.
      * @throws IOException
      *             If any errors occur during the unzipping.
-     * @see #gzipFile(File, File)
+     * @see #gunzipFile(URL, File)
      */
     public static void gunzipFile(URL toUnzip, File toFile) throws IOException {
         if (toFile.exists() && !toFile.isFile()) {
             throw new IllegalArgumentException("Destination file " + toFile + " exists, but is not a file and, as such, cannot be written to.");
         }
 
-        GZIPInputStream zipIn = null;
-        FileOutputStream fileOut = null;
-        try {
-            zipIn = new GZIPInputStream(toUnzip.openStream());
-            fileOut = new FileOutputStream(toFile);
+        try (final GZIPInputStream zipIn = new GZIPInputStream(toUnzip.openStream()); final FileOutputStream fileOut = new FileOutputStream(toFile)){
             IOUtils.copy(zipIn, fileOut);
-        } finally {
-            IOUtils.closeQuietly(fileOut);
-            IOUtils.closeQuietly(zipIn);
         }
     }
 
@@ -73,7 +66,6 @@ public class ArchiveUtils {
      *             If the given TAR file is not a file or does not exist or the given output directory is not a directory or does not exist.
      * @throws IOException
      *             If any errors occur during the extraction.
-     * @see #tarDirectory(File, File)
      */
     public static void untarFile(File tarFile, File toDirectory) throws IOException {
         if (!tarFile.isFile()) {

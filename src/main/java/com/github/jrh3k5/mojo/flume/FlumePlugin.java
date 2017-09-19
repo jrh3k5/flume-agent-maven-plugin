@@ -34,19 +34,19 @@ public class FlumePlugin {
 
     /**
      * Get the artifact ID of the Flume plugin.
-     * 
+     *
      * @return The artifact ID of the Flume plugin.
      */
-    public String getArtifactId() {
+    String getArtifactId() {
         return artifactId;
     }
 
     /**
      * Get the classifier to be matched.
-     * 
+     *
      * @return The classifier to be matched.
      */
-    public String getClassifier() {
+    String getClassifier() {
         return classifier;
     }
 
@@ -55,7 +55,7 @@ public class FlumePlugin {
      * 
      * @return The group ID of the Flume plugin.
      */
-    public String getGroupId() {
+    String getGroupId() {
         return groupId;
     }
 
@@ -64,7 +64,7 @@ public class FlumePlugin {
      * 
      * @return The type to be matched.
      */
-    public String getType() {
+    String getType() {
         return type;
     }
 
@@ -75,11 +75,11 @@ public class FlumePlugin {
      *            The {@link Artifact} to be matched.
      * @return {@code true} if the given artifact is judged to be a representation of this Flume plugin; {@code false} if not.
      */
-    public boolean matches(Artifact artifact) {
+    boolean matches(Artifact artifact) {
         boolean matches = getGroupId().equals(artifact.getGroupId());
         matches &= getArtifactId().equals(artifact.getArtifactId());
-        matches &= classifier.matches(artifact.getClassifier());
-        matches &= type.equals(artifact.getType());
+        matches &= getClassifier().matches(artifact.getClassifier());
+        matches &= getType().equals(artifact.getType());
         return matches;
     }
 
@@ -89,7 +89,8 @@ public class FlumePlugin {
      * @param artifactId
      *            The artifact ID of the Flume plugin.
      */
-    public void setArtifactId(String artifactId) {
+    @SuppressWarnings("unused")
+    void setArtifactId(String artifactId) {
         this.artifactId = artifactId;
     }
 
@@ -99,7 +100,8 @@ public class FlumePlugin {
      * @param classifier
      *            The classifier to be matched.
      */
-    public void setClassifier(String classifier) {
+    @SuppressWarnings("unused")
+    void setClassifier(String classifier) {
         this.classifier = classifier;
     }
 
@@ -109,7 +111,7 @@ public class FlumePlugin {
      * @param groupId
      *            The group ID of the Flume plugin.
      */
-    public void setGroupId(String groupId) {
+    void setGroupId(String groupId) {
         this.groupId = groupId;
     }
 
@@ -119,7 +121,8 @@ public class FlumePlugin {
      * @param type
      *            The type to be matched.
      */
-    public void setType(String type) {
+    @SuppressWarnings("unused")
+    void setType(String type) {
         this.type = type;
     }
 

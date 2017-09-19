@@ -41,7 +41,7 @@ public class RunFlumeAgentsMojo extends AbstractFlumeAgentsMojo {
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         final List<Agent> agents = getAgents();
-        final List<AgentProcess> agentProcesses = new ArrayList<AgentProcess>(agents.size());
+        final List<AgentProcess> agentProcesses = new ArrayList<>(agents.size());
         for (Agent agent : agents) {
             final AgentProcess agentProcess = buildAgentProcess(agent);
             try {

@@ -27,7 +27,7 @@ import java.util.List;
  * @since 1.1
  */
 
-public class Libs {
+class Libs {
     private List<String> removals = Collections.emptyList();
 
     /**
@@ -35,7 +35,7 @@ public class Libs {
      * 
      * @return A {@link List} of {@link String} representing the libraries to be removed.
      */
-    public List<String> getRemovals() {
+    List<String> getRemovals() {
         return removals;
     }
 
@@ -45,7 +45,7 @@ public class Libs {
      * @param removals
      *            A {@link List} of {@link String} representing the libraries to be removed.
      */
-    public void setRemovals(List<String> removals) {
+    void setRemovals(List<String> removals) {
         this.removals = Collections.unmodifiableList(removals);
     }
 }

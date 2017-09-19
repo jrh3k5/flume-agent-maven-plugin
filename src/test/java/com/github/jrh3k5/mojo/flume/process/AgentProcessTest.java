@@ -196,7 +196,7 @@ public class AgentProcessTest extends AbstractUnitTest {
          * @param argumentValue
          *            The value of the argument.
          */
-        public Argument(String argumentName, String argumentValue) {
+        Argument(String argumentName, String argumentValue) {
             this.argumentName = argumentName;
             this.argumentValue = argumentValue;
         }

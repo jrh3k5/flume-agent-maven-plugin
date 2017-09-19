@@ -57,7 +57,7 @@ public class Agent {
     /**
      * Get the list of any external Flume plugins to be installed into the agent's plugins directory.
      * 
-     * @return A {@list List} of {@link FlumePlugin} objects representing any third-party plugins used by the agent.
+     * @return A {@link List} of {@link FlumePlugin} objects representing any third-party plugins used by the agent.
      */
     public List<FlumePlugin> getFlumePlugins() {
         return flumePlugins;
@@ -116,10 +116,10 @@ public class Agent {
      * Set the list of any external Flume plugins to be installed into the agent's plugins directory.
      * 
      * @param flumePlugins
-     *            A {@list List} of {@link FlumePlugin} objects representing any third-party plugins used by the agent.
+     *            A {@link List} of {@link FlumePlugin} objects representing any third-party plugins used by the agent.
      */
     public void setFlumePlugins(List<FlumePlugin> flumePlugins) {
-        this.flumePlugins = flumePlugins == null ? Collections.<FlumePlugin> emptyList() : Collections.unmodifiableList(flumePlugins);
+        this.flumePlugins = flumePlugins == null ? Collections.emptyList() : Collections.unmodifiableList(flumePlugins);
     }
 
     /**
