@@ -34,6 +34,10 @@
         <system>GitHub</system>
         <url>https://github.com/jrh3k5/flume-agent-maven-plugin/issues</url>
     </issueManagement>
+    <ciManagement>
+        <system>Travis</system>
+        <url>https://travis-ci.org/jrh3k5/flume-agent-maven-plugin/</url>
+    </ciManagement>
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>

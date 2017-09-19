@@ -1,5 +1,7 @@
 # Flume Agent Maven Plugin
 
+<img src="https://travis-ci.org/jrh3k5/flume-agent-maven-plugin.svg?branch=master" />
+
 A Maven plugin used to start, stop, and run a Flume agent.
 
 ## Goals
