@@ -7,3 +7,4 @@ release.properties
 .project
 .DS_Store
 .idea
+flume-agent-maven-plugin.iml
