@@ -27,7 +27,7 @@ import java.util.List;
  * @since 1.1
  */
 
-class Libs {
+public class Libs {
     private List<String> removals = Collections.emptyList();
 
     /**

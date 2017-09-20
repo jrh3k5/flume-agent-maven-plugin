@@ -13,4 +13,4 @@
 #    mvn clean install
 #  ...to get the plugin installed in the local repo
 
-mvn flume-agent:run
+mvn flume-agent:run -e

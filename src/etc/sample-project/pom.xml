@@ -70,6 +70,12 @@
                         <agent>
                             <agentName>a1</agentName>
                             <configFile>${project.basedir}/src/main/resources</configFile>
+                            <javaOpts>-Xms128m -Xmx512m</javaOpts>
+                            <libs>
+                                <removals>
+                                    <removal>avro-1.7.4.jar</removal>
+                                </removals>
+                            </libs>
                         </agent>
                     </agents>
                 </configuration>

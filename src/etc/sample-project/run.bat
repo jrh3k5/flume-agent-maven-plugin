@@ -1,1 +1,1 @@
-mvn flume-agent:run
+mvn flume-agent:run -e
