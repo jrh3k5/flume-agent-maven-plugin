@@ -17,6 +17,8 @@
  */
 package com.github.jrh3k5.mojo.flume.process;
 
+import org.apache.commons.lang3.SystemUtils;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -102,7 +104,7 @@ public class AgentProcess {
             throw new IllegalStateException("An agent process is already being managed by this object and another cannot be started.");
         }
 
-        process = new ProcessBuilderProxy(flumeDirectory, getProcessArgs()).start();
+        process = new ProcessBuilderProxy(flumeDirectory, getProcessArgs(flumeDirectory)).start();
 
         // Register a shutdown hook to ensure that the process is terminated with the JVM
         Runtime.getRuntime().addShutdownHook(new Thread(new FlumeShutdownRunnable(this), getClass().getCanonicalName() + "-shutdown-thread-" + UUID.randomUUID().toString()));
@@ -168,12 +170,17 @@ public class AgentProcess {
      * Get the process arguments to be used when invoking the Flume agent.
      * <p />
      * This is intentionally made package-private for testing purposes.
-     * 
+     *
+     * @param flumeDirectory A {@link File} describing the directory in which Flume is installed.
      * @return A {@link List} of {@link String} objects representing the process arguments to be used.
      */
-    private List<String> getProcessArgs() {
+    private List<String> getProcessArgs(File flumeDirectory) {
         final List<String> processArgs = new ArrayList<>((arguments.size() * 2) + 2);
-        processArgs.add("bin/flume-ng");
+        if(SystemUtils.IS_OS_WINDOWS) {
+            processArgs.add(new File(flumeDirectory, "bin/flume-ng.cmd").getAbsolutePath());
+        } else {
+            processArgs.add("bin/flume-ng");
+        }
         processArgs.add("agent");
         for (Entry<AgentArguments, String> argument : arguments.entrySet()) {
             processArgs.add(String.format("-%s", argument.getKey().getArgumentName()));

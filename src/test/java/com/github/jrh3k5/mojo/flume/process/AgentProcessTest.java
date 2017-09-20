@@ -17,23 +17,13 @@
  */
 package com.github.jrh3k5.mojo.flume.process;
 
-import static org.fest.assertions.Assertions.assertThat;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.whenNew;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
-
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
+import com.github.jrh3k5.mojo.flume.AbstractUnitTest;
+import com.github.jrh3k5.mojo.flume.process.AgentProcess.ProcessBuilderProxy;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+import org.apache.commons.lang3.SystemUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,8 +31,13 @@ import org.mockito.ArgumentCaptor;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import com.github.jrh3k5.mojo.flume.AbstractUnitTest;
-import com.github.jrh3k5.mojo.flume.process.AgentProcess.ProcessBuilderProxy;
+import java.io.File;
+import java.util.*;
+
+import static org.fest.assertions.Assertions.assertThat;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.*;
+import static org.powermock.api.mockito.PowerMockito.whenNew;
 
 /**
  * Unit tests for {@link AgentProcess}.
@@ -115,8 +110,14 @@ public class AgentProcessTest extends AbstractUnitTest {
 
         @SuppressWarnings("unchecked")
         final List<String> args = argsCaptor.getValue();
+        final String expectedCommand;
+        if(SystemUtils.IS_OS_WINDOWS) {
+            expectedCommand = new File(flumeDirectory, "bin/flume-ng.cmd").getAbsolutePath();
+        } else {
+            expectedCommand = "bin/flume-ng";
+        }
         // First two commands needed to start the agent - the rest can be in any orders
-        assertThat(args.subList(0, 2)).containsExactly("bin/flume-ng", "agent");
+        assertThat(args.subList(0, 2)).containsExactly(expectedCommand, "agent");
         assertThat(getArguments(args.subList(2, args.size()))).containsOnly(new Argument("-c", "conf"), new Argument("-f", configFile.getAbsolutePath()), new Argument("-n", agentName));
     }
 
@@ -169,7 +170,7 @@ public class AgentProcessTest extends AbstractUnitTest {
             throw new IllegalArgumentException("Unexpected, non-even size of arguments: " + args);
         }
 
-        final Collection<Argument> arguments = new ArrayList<Argument>(args.size() / 2);
+        final Collection<Argument> arguments = new ArrayList<>(args.size() / 2);
         for (int i = 0; i < args.size(); i += 2) {
             arguments.add(new Argument(args.get(i), args.get(i+1)));
         }
@@ -182,38 +183,13 @@ public class AgentProcessTest extends AbstractUnitTest {
      * @author jh016266
      * @since 4.0
      */
+    @AllArgsConstructor
+    @EqualsAndHashCode
+    @ToString
     private static class Argument {
-        @SuppressWarnings("unused")
+        @Getter
         private String argumentName;
-        @SuppressWarnings("unused")
+        @Getter
         private String argumentValue;
-
-        /**
-         * Create an argument.
-         * 
-         * @param argumentName
-         *            The name of the argument.
-         * @param argumentValue
-         *            The value of the argument.
-         */
-        Argument(String argumentName, String argumentValue) {
-            this.argumentName = argumentName;
-            this.argumentValue = argumentValue;
-        }
-
-        @Override
-        public boolean equals(Object object) {
-            return EqualsBuilder.reflectionEquals(this, object);
-        }
-
-        @Override
-        public int hashCode() {
-            return HashCodeBuilder.reflectionHashCode(this);
-        }
-
-        @Override
-        public String toString() {
-            return ToStringBuilder.reflectionToString(this);
-        }
     }
 }
