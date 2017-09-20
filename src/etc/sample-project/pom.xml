@@ -69,7 +69,7 @@
                     <agents>
                         <agent>
                             <agentName>a1</agentName>
-                            <configFile>${project.basedir}src/main/resources</configFile>
+                            <configFile>${project.basedir}/src/main/resources</configFile>
                         </agent>
                     </agents>
                 </configuration>
