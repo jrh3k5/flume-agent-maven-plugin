@@ -32,7 +32,7 @@ class Libs {
 
     /**
      * Get the list of libraries, if any, that are to be removed.
-     * 
+     *
      * @return A {@link List} of {@link String} representing the libraries to be removed.
      */
     List<String> getRemovals() {
@@ -41,7 +41,7 @@ class Libs {
 
     /**
      * Set the list of libraries to be removed.
-     * 
+     *
      * @param removals
      *            A {@link List} of {@link String} representing the libraries to be removed.
      */

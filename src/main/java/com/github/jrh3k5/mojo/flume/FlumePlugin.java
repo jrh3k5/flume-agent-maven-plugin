@@ -17,7 +17,9 @@
  */
 package com.github.jrh3k5.mojo.flume;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import org.apache.maven.artifact.Artifact;
 
 /**
@@ -26,47 +28,41 @@ import org.apache.maven.artifact.Artifact;
  * @author Joshua Hyde
  */
 
+@Getter @Setter
+@ToString
 public class FlumePlugin {
-    private String groupId;
-    private String artifactId;
-    private String classifier = "flume-plugin";
-    private String type = "tar.gz";
-
     /**
-     * Get the artifact ID of the Flume plugin.
+     * The group ID of the Flume plugin.
      *
-     * @return The artifact ID of the Flume plugin.
-     */
-    String getArtifactId() {
-        return artifactId;
-    }
-
-    /**
-     * Get the classifier to be matched.
-     *
-     * @return The classifier to be matched.
-     */
-    String getClassifier() {
-        return classifier;
-    }
-
-    /**
-     * Get the group ID of the Flume plugin.
-     * 
+     * @param groupId
+     *            The group ID of the Flume plugin.
      * @return The group ID of the Flume plugin.
      */
-    String getGroupId() {
-        return groupId;
-    }
-
+    private String groupId;
     /**
-     * Get the type to be matched.
-     * 
+     * The artifact ID of the Flume plugin.
+     *
+     * @param artifactId
+     *            The artifact ID of the Flume plugin.
+     * @return The artifact ID of the Flume plugin.
+     */
+    private String artifactId;
+    /**
+     * The classifier to be matched.
+     *
+     * @param classifier
+     *            The classifier to be matched.
+     * @return The classifier to be matched.
+     */
+    private String classifier = "flume-plugin";
+    /**
+     * The type to be matched.
+     *
+     * @param type
+     *            The type to be matched.
      * @return The type to be matched.
      */
-    String getType() {
-        return type;
-    }
+    private String type = "tar.gz";
 
     /**
      * Determine whether or not the given artifact represents this Flume plugin.
@@ -81,53 +77,5 @@ public class FlumePlugin {
         matches &= getClassifier().matches(artifact.getClassifier());
         matches &= getType().equals(artifact.getType());
         return matches;
-    }
-
-    /**
-     * Set the artifact ID of the Flume plugin.
-     * 
-     * @param artifactId
-     *            The artifact ID of the Flume plugin.
-     */
-    @SuppressWarnings("unused")
-    void setArtifactId(String artifactId) {
-        this.artifactId = artifactId;
-    }
-
-    /**
-     * Set the classifier to be matched.
-     * 
-     * @param classifier
-     *            The classifier to be matched.
-     */
-    @SuppressWarnings("unused")
-    void setClassifier(String classifier) {
-        this.classifier = classifier;
-    }
-
-    /**
-     * Set the group ID of the Flume plugin.
-     * 
-     * @param groupId
-     *            The group ID of the Flume plugin.
-     */
-    void setGroupId(String groupId) {
-        this.groupId = groupId;
-    }
-
-    /**
-     * Set the type to be matched.
-     * 
-     * @param type
-     *            The type to be matched.
-     */
-    @SuppressWarnings("unused")
-    void setType(String type) {
-        this.type = type;
-    }
-
-    @Override
-    public String toString() {
-        return ToStringBuilder.reflectionToString(this);
     }
 }

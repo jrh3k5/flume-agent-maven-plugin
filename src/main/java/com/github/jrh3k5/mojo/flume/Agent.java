@@ -17,6 +17,9 @@
  */
 package com.github.jrh3k5.mojo.flume;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
@@ -28,129 +31,57 @@ import java.util.List;
  * @since 2.0
  */
 
+@Getter @Setter
 public class Agent {
-    private List<FlumePlugin> flumePlugins = Collections.emptyList();
-    private String agentName;
-    private File configFile;
-    private String javaOpts = "-Xmx20m";
-    private File loggingProperties;
-    private Libs libs = new Libs();
-
     /**
-     * Get the name of the agent.
-     * 
-     * @return The name of the agent.
-     */
-    public String getAgentName() {
-        return agentName;
-    }
-
-    /**
-     * Get the location of the Flume agent's configuration file.
-     * 
-     * @return A {@link File} object representing the location of the agent's configuration file.
-     */
-    public File getConfigFile() {
-        return configFile;
-    }
-
-    /**
-     * Get the list of any external Flume plugins to be installed into the agent's plugins directory.
-     * 
+     * The list of any external Flume plugins to be installed into the agent's plugins directory.
+     *
+     * @param flumePlugins
+     *            A {@link List} of {@link FlumePlugin} objects representing any third-party plugins used by the agent.
      * @return A {@link List} of {@link FlumePlugin} objects representing any third-party plugins used by the agent.
      */
-    public List<FlumePlugin> getFlumePlugins() {
-        return flumePlugins;
-    }
-
+    private List<FlumePlugin> flumePlugins = Collections.emptyList();
     /**
-     * Get the JVM arguments to be passed into the Flume agent as part of its runtime environment configuration.
-     * 
+     * The name of the agent.
+     *
+     * @param agentName
+     *            The name of the agent.
+     * @return The name of the agent.
+     */
+    private String agentName;
+    /**
+     * The location of the Flume agent's configuration file.
+     *
+     * @param configFile
+     *            A {@link File} object representing the location of the agent's configuration file.
+     * @return A {@link File} object representing the location of the agent's configuration file.
+     */
+    private File configFile;
+    /**
+     * The JVM arguments to be passed into the Flume agent as part of its runtime environment configuration.
+     *
+     * @param javaOpts
+     *            The JVM arguments to be supplied to the Flume agent's JVM.
      * @return The JVM arguments to be supplied to the Flume agent's JVM.
      */
-    public String getJavaOpts() {
-        return javaOpts;
-    }
-
+    private String javaOpts = "-Xmx20m";
     /**
-     * Get the configuration of the Flume agent's {@code libs/} directory.
-     * 
-     * @return A {@link Libs} object representing the desired configuration of the agent's {@code libs/} directory.
-     */
-    public Libs getLibs() {
-        return libs;
-    }
-
-    /**
-     * Get the file contining the logging configuration properties.
-     * 
+     * The file containing the logging configuration properties.
+     *
+     * @param loggingProperties
+     *            {@code null} if no logging properties file has been provided and Flume's default configuration should be used; otherwise, a {@link File} representing the location of a file
+     *            describing the properties of the Flume agent logging configuration to be used.
      * @return {@code null} if no logging properties file has been provided and Flume's default configuration should be used; otherwise, a {@link File} representing the location of a file describing
      *         the properties of the Flume agent logging configuration to be used.
      * @since 2.1.1
      */
-    public File getLoggingProperties() {
-        return loggingProperties;
-    }
-
+    private File loggingProperties;
     /**
-     * Set the name of the agent.
-     * 
-     * @param agentName
-     *            The name of the agent.
-     */
-    public void setAgentName(String agentName) {
-        this.agentName = agentName;
-    }
-
-    /**
-     * Set the location of the Flume agent's configuration file.
-     * 
-     * @param configFile
-     *            A {@link File} object representing the location of the agent's configuration file.
-     */
-    public void setConfigFile(File configFile) {
-        this.configFile = configFile;
-    }
-
-    /**
-     * Set the list of any external Flume plugins to be installed into the agent's plugins directory.
-     * 
-     * @param flumePlugins
-     *            A {@link List} of {@link FlumePlugin} objects representing any third-party plugins used by the agent.
-     */
-    public void setFlumePlugins(List<FlumePlugin> flumePlugins) {
-        this.flumePlugins = flumePlugins == null ? Collections.emptyList() : Collections.unmodifiableList(flumePlugins);
-    }
-
-    /**
-     * Set the JVM arguments to be passed into the Flume agent as part of its runtime environment configuration.
-     * 
-     * @param javaOpts
-     *            The JVM arguments to be supplied to the Flume agent's JVM.
-     */
-    public void setJavaOpts(String javaOpts) {
-        this.javaOpts = javaOpts;
-    }
-
-    /**
-     * Set the configuration of the Flume agent's {@code libs/} directory.
-     * 
+     * The configuration of the Flume agent's {@code libs/} directory.
+     *
      * @param libs
      *            A {@link Libs} object representing the desired configuration of the agent's {@code libs/} directory.
+     * @return A {@link Libs} object representing the desired configuration of the agent's {@code libs/} directory.
      */
-    public void setLibs(Libs libs) {
-        this.libs = libs;
-    }
-
-    /**
-     * Set the file contining the logging configuration properties.
-     * 
-     * @param loggingProperties
-     *            {@code null} if no logging properties file has been provided and Flume's default configuration should be used; otherwise, a {@link File} representing the location of a file
-     *            describing the properties of the Flume agent logging configuration to be used.
-     * @since 2.1.1
-     */
-    public void setLoggingProperties(File loggingProperties) {
-        this.loggingProperties = loggingProperties;
-    }
+    private Libs libs = new Libs();
 }
