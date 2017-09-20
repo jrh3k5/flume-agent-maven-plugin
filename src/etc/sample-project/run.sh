@@ -7,6 +7,7 @@
 #  git config --global user.email "jrh3k5@gmail.com"
 #  apt-get install default-jdk
 #  apt-get install maven
+#  git clone https://github.com/jrh3k5/flume-agent-maven-plugin.git
 #
 #  From the root directory of the project, run:
 #    mvn clean install
