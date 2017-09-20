@@ -2,7 +2,7 @@
 
 <img src="https://travis-ci.org/jrh3k5/flume-agent-maven-plugin.svg?branch=master" />
 
-A Maven plugin used to start, stop, and run a Flume agent.
+A Maven plugin used to start, stop, and run a Flume agent. By default, this runs Flume 1.7.0.
 
 ## Goals
 
