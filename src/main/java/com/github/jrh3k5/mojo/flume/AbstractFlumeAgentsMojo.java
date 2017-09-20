@@ -71,7 +71,7 @@ public abstract class AbstractFlumeAgentsMojo extends AbstractMojo {
     /**
      * The URL from which the Flume binary archive should be downloaded.
      */
-    @Parameter(required = true, defaultValue = "http://archive.apache.org/dist/flume/1.4.0/apache-flume-1.4.0-bin.tar.gz")
+    @Parameter(required = true, defaultValue = "http://archive.apache.org/dist/flume/1.7.0/apache-flume-1.7.0-bin.tar.gz")
     private URL flumeArchiveUrl;
 
     /**
@@ -81,7 +81,7 @@ public abstract class AbstractFlumeAgentsMojo extends AbstractMojo {
      * 
      * @since 2.1
      */
-    @Parameter(required = true, defaultValue = "f0742b1b4dcb801dad544cfa49154d0e")
+    @Parameter(required = true, defaultValue = "12496e632a96d7ca823ab3c239a2a7d2")
     private String flumeArchiveMd5;
 
     /**
