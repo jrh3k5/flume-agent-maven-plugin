@@ -9,6 +9,7 @@ A Maven plugin used to start, stop, and run a Flume agent. By default, this runs
 This plugin defines three goals:
 
 * **run**: This, given the configuration of the plugin, runs a standalone instance of Flume agents.
+  * NOTE: there is a known issue of a process being left behind on Windows platforms. Refer to [#19](https://github.com/jrh3k5/flume-agent-maven-plugin/issues/19) for more information.
 * **start**: This starts the configured Flume agents. By default, it binds to the `pre-integration-test` phase.
 * **stop**: This is the counterpart to the `start` goal, stopping the agents it started. By default, it binds to the `post-integration-test` phase.
 
