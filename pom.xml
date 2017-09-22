@@ -11,6 +11,7 @@
     <packaging>maven-plugin</packaging>
     <name>Flume Agent Maven Plugin</name>
     <description>A Maven plugin to manage the lifecycle of a Flume agent</description>
+    <url>https://github.com/jrh3k5/flume-agent-maven-plugin/</url>
     <distributionManagement>
         <snapshotRepository>
             <id>ossrh</id>
