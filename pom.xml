@@ -7,7 +7,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.jrh3k5</groupId>
     <artifactId>flume-agent-maven-plugin</artifactId>
-    <version>3.1-SNAPSHOT</version>
+    <version>3.0.1</version>
     <packaging>maven-plugin</packaging>
     <name>Flume Agent Maven Plugin</name>
     <description>A Maven plugin to manage the lifecycle of a Flume agent</description>
@@ -35,7 +35,7 @@
         <connection>scm:git:https://github.com/jrh3k5/flume-agent-maven-plugin.git</connection>
         <developerConnection>scm:git:https://github.com/jrh3k5/flume-agent-maven-plugin.git</developerConnection>
         <url>https://github.com/jrh3k5/flume-agent-maven-plugin</url>
-        <tag>flume-agent-maven-plugin-3.0</tag>
+        <tag>flume-agent-maven-plugin-3.0.1</tag>
     </scm>
     <issueManagement>
         <system>GitHub</system>
